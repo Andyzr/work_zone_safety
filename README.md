@@ -3,7 +3,7 @@
 The code in this project is finished in the following steps:
 
 1. Use Python to perform map-matching on work zones and crashes. Save the output as separate files.
-2. Export separate files into Sqlite3 and PostgreSQL databases. Then use SQL and use Python to do data fusion.
+2. Export separate files into SQLite and PostgreSQL databases. Then use SQL and use Python to do data fusion.
 3. Using R, import the processed data and do the major model analysis.
 4. Some robustness tests require new data sets (spatial robustness tests and bandwidth sensitivity tests), so some wrapped code are created in `datavariation/wzsafety` to quickly produce required new data set with configure files `wzspatial.yaml` and `wzsens.yaml`.
 5. Most model analysis are finished in R, while `./models/rebust_firth_20200823.do` is executed in Stata.
@@ -15,9 +15,9 @@ These codes are stored at `./datapreprocessing`.
 ### Map-matching
 
 1. Using the work zone data (from [PennDOT Road Condition Reporting System](https://www.penndot.gov/Doing-Business/OnlineServices/Pages/Developer-Resources-DocumentationAPI.aspx)) and roadway network data (from [PennDOT Open Share, PennShare](https://data-pennshare.opendata.arcgis.com/datasets/rmsseg-state-roads)), run map-matching algorithms in `./datapreprocessing/map-matching-workzone-within.py`. This step will identify area of work zones on the PennShare map.
-2. Run `./datapreprocessing/map-matching-workzone-all-files-to-db.py`. This step will identify the upstream and downstream area of work zones on the PennShare map. The results will save in a Sqlite3 database (`wz_loc.db`).
+2. Run `./datapreprocessing/map-matching-workzone-all-files-to-db.py`. This step will identify the upstream and downstream area of work zones on the PennShare map. The results will save in a SQLite database (`wz_loc.db`).
 3. Using the [PennDOT crash data](https://pennshare.maps.arcgis.com/apps/webappviewer/index.html?id=8fdbf046e36e41649bbfd9d7dd7c7e7e), run `./datapreprocessing/map-matching-crash.py`. This step will identify the locations of crashes, stored in separate files.
-4. Run `./datapreprocessing/crash-files-to-db.py`. This step will convert the location of crashes into a Sqlite3 database (`crash_db.db`).
+4. Run `./datapreprocessing/crash-files-to-db.py`. This step will convert the location of crashes into a SQLite database (`crash_db.db`).
 
 ### Other work zone information to database
 
