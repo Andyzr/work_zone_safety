@@ -1,6 +1,6 @@
 # Work zone safety study
 
-The code in this project is finished in the following steps:
+The workflow of this project:
 
 1. Use Python to perform map-matching on work zones and crashes. Save the output as separate files.
 2. Export separate files into SQLite and PostgreSQL databases. Then use SQL and use Python to do data fusion.
