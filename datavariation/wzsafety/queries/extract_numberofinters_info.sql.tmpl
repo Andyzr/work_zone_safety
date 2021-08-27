@@ -1,0 +1,3 @@
+drop table if exists workzone.spatial_pseudo_numberofinters;
+create table workzone.spatial_pseudo_numberofinters
+as select workzone.{spatial_pseudo_wz_info}.series, workzone.nearest_inters( workzone.{spatial_pseudo_wz_info}.pennshids) as num_inters from  workzone.{spatial_pseudo_wz_info};

@@ -1,0 +1,23 @@
+create table {spatial_weather_table_output_name} as
+select {spatial_weather_table_name}.series,
+        {spatial_weather_table_name}.control,
+        {spatial_weather_table_name}.sequence_num,
+        {spatial_weather_table_name}.wztime_divided_stamp_controlled,
+AVG(AveT) as AveT, AVG(Precip) as AveP, AVG(AveWindSpeed) as AveW
+from {spatial_weather_table_name}
+left join
+weather_db.pid_wid
+on {spatial_weather_table_name}.pennshid = weather_db.pid_wid.pennshids
+left join
+weather_db.weather
+on weather_db.pid_wid.ID = weather_db.weather.ID
+AND 
+weather_db.weather.DateTime 
+BETWEEN 
+datetime({spatial_weather_table_name}.wztime_divided_stamp_controlled, '-3.5 hours') 
+AND
+datetime({spatial_weather_table_name}.wztime_divided_stamp_controlled , '-0.5 hours')
+GROUP BY {spatial_weather_table_name}.series,
+        {spatial_weather_table_name}.control,
+        {spatial_weather_table_name}.sequence_num,
+        {spatial_weather_table_name}.wztime_divided_stamp_controlled;

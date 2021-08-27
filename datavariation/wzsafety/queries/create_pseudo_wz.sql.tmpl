@@ -1,0 +1,128 @@
+
+--S1: create random selected road segements table
+drop table if exists workzone.spatial_robusts;
+ create table workzone.spatial_robusts as
+select
+	public.pennshare_pa_south_ids_good.*
+from
+	public.pennshare_pa_south_ids_good
+order by
+	random()
+limit {numberofpseudowzs};
+--
+--select setseed(.123);
+--- add series
+ alter table workzone.spatial_robusts add column series serial primary key;
+
+--S2: create time table
+drop table if exists workzone.spatial_robusts_times; 
+ create table workzone.spatial_robusts_times as
+select
+	timestamp '2015-01-01 00:00:00' at time zone 'America/New_York' + random() * (timestamp '2017-06-01 24:00:00' at time zone 'America/New_York' - timestamp '2015-01-01 00:00:00' at time zone 'America/New_York') as time_ob
+from
+	generate_series(1, {numberofpseudowzs});
+--- add series
+ alter table workzone.spatial_robusts_times add column series serial primary key;
+
+---merge spatial and time
+-- select
+--	workzone.spatial_robusts.*,
+--	workzone.spatial_robusts_times.time_ob
+--from
+--	workzone.spatial_robusts
+--left join workzone.spatial_robusts_times on
+--	workzone.spatial_robusts.series = workzone.spatial_robusts_times.series ;
+
+--- format time: round time to nearest 30 min
+-- select
+--	workzone.spatial_robusts.*,
+--	to_timestamp(floor((extract('epoch' from workzone.spatial_robusts_times.time_ob) / 1800 )) * 1800) as time_round
+--from
+--	workzone.spatial_robusts
+--left join workzone.spatial_robusts_times on
+--	workzone.spatial_robusts.series = workzone.spatial_robusts_times.series ;
+
+---check whether the random observation is in the work zone records
+
+-----this is the pennshid with work zone duration
+-- select
+--	workzone.workzone15_loc_518.*,
+--	public.workzone_2015_17."DATE_TIME_CLOSED_QRY",
+--	public.workzone_2015_17."ACT_DATE_TIME_OPENED_QRY"
+--from
+--	workzone.workzone15_loc_518
+--inner join public.workzone_2015_17 on
+--	workzone.workzone15_loc_518.wzid = public.workzone_2015_17."cleanID"-1
+--limit 100;
+
+---- this is the series within work zones, need to exclude them
+drop table if exists workzone.spatial_need_exclude; 
+create table workzone.spatial_need_exclude as
+select
+	pseudo.series, wzidtime.wzid
+from
+	(
+	select
+		workzone.spatial_robusts.*, to_timestamp(floor((extract('epoch' from workzone.spatial_robusts_times.time_ob) / 1800 )) * 1800) as time_round
+	from
+		workzone.spatial_robusts
+	left join workzone.spatial_robusts_times on
+		workzone.spatial_robusts.series = workzone.spatial_robusts_times.series) pseudo
+inner join (
+	select
+		workzone.workzone15_loc_518.*, to_timestamp(public.workzone_2015_17."DATE_TIME_CLOSED_QRY"::text, 'yyyymmddhh24mi') at time zone 'America/New_York' as closed, to_timestamp(public.workzone_2015_17."ACT_DATE_TIME_OPENED_QRY"::text, 'yyyymmddhh24mi')  at time zone 'America/New_York' as opened
+	from
+		workzone.workzone15_loc_518
+	inner join public.workzone_2015_17 on
+		workzone.workzone15_loc_518.wzid = public.workzone_2015_17."cleanID"-1
+)wzidtime on
+	(pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed
+	and pseudo.time_round< wzidtime.opened)
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed- interval '1 week'
+	and pseudo.time_round< wzidtime.opened - interval '1 week')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed- interval '2 weeks'
+	and pseudo.time_round< wzidtime.opened - interval '2 weeks')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed- interval '3 weeks'
+	and pseudo.time_round< wzidtime.opened - interval '3 weeks')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed- interval '4 weeks'
+	and pseudo.time_round< wzidtime.opened - interval '4 weeks')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed- interval '5 weeks'
+	and pseudo.time_round< wzidtime.opened - interval '5 weeks')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed- interval '6 weeks'
+	and pseudo.time_round< wzidtime.opened - interval '6 weeks')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed + interval '1 week'
+	and pseudo.time_round< wzidtime.opened + interval '1 week')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed + interval '2 weeks'
+	and pseudo.time_round< wzidtime.opened + interval '2 weeks')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed + interval '3 weeks'
+	and pseudo.time_round< wzidtime.opened + interval '3 weeks')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed + interval '4 weeks'
+	and pseudo.time_round< wzidtime.opened + interval '4 weeks')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed + interval '5 weeks'
+	and pseudo.time_round< wzidtime.opened + interval '5 weeks')
+	or (pseudo.pennshids = wzidtime.pennshid
+	and pseudo.time_round > wzidtime.closed + interval '6 weeks'
+	and pseudo.time_round< wzidtime.opened + interval '6 weeks');
+
+---exclude the random observations which are in the work zone records
+drop table if exists workzone.spatial_pseudo;
+create table workzone.spatial_pseudo as
+	select
+		workzone.spatial_robusts.*, to_timestamp(floor((extract('epoch' from workzone.spatial_robusts_times.time_ob) / 1800 )) * 1800) as time_round
+	from
+		workzone.spatial_robusts
+	left join workzone.spatial_robusts_times on
+		workzone.spatial_robusts.series = workzone.spatial_robusts_times.series
+	where workzone.spatial_robusts_times.series not in (select series from workzone.spatial_need_exclude);

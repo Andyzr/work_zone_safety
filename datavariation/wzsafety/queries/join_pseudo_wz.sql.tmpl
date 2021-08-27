@@ -1,0 +1,45 @@
+create table workzone.{pseudo_output_table} as
+select
+	workzone.spatial_pseudo_wz_divided_controlled.series as wzid_new,
+	workzone.spatial_pseudo_wz_divided_controlled.control,
+	workzone.spatial_pseudo_wz_divided_controlled.wztime_divided_stamp_controlled as wztime_divided_stamp,
+	workzone.spatial_pseudo_wz_info.location,
+	workzone.spatial_pseudo_wz_info.closure,
+	workzone.spatial_pseudo_wz_info.lanecounts,
+	workzone.spatial_pseudo_aadt_speed_limit.aadt_new,
+	workzone.spatial_pseudo_wz_info.nhs_ind,
+	workzone.spatial_pseudo_wz_info.pa_byway_i,
+	cast (workzone.spatial_pseudo_wz_info.duration as int) as duration,
+	cast(date_part('dow', workzone.spatial_pseudo_wz_divided_controlled.wztime_divided_stamp_controlled) between 1 and 5 as int) as weekdayofweek,
+	date_part('month', workzone.spatial_pseudo_wz_divided_controlled.wztime_divided_stamp_controlled) as month,
+	cast(date_part('hour', workzone.spatial_pseudo_wz_divided_controlled.wztime_divided_stamp_controlled) between 6 and 17 as int) as daytimeofday,
+	workzone.spatial_pseudo_aadt_speed_limit.speed_limit,
+	workzone.spatial_pseudo_wz_info.netlength,
+	date_part('year', workzone.spatial_pseudo_wz_divided_controlled.wztime_divided_stamp_controlled) as year,
+	workzone.spatial_pseudo_weather_matched."AveT" as avet,
+	workzone.spatial_pseudo_weather_matched."AveP" as avep,
+	workzone.spatial_pseudo_weather_matched."AveW" as avew,
+	workzone.spatial_pseudo_speed_matched.real_speed_61 as real_speed_61,
+	workzone.spatial_pseudo_speed_matched.historical_speed_61 as historical_speed_61,
+	workzone.spatial_pseudo_speed_matched.free_speed_61 as free_speed_61,
+	workzone.spatial_pseudo_wz_crash.crash_occurrence as crash_61,
+	workzone.spatial_pseudo_wz_crash.crash_severity as crash_severe_61,
+    workzone.spatial_pseudo_numberofinters.num_inters
+from
+	workzone.spatial_pseudo_wz_divided_controlled
+left join workzone.spatial_pseudo_wz_info
+		using (series)
+left join workzone.spatial_pseudo_aadt_speed_limit
+		using (series, sequence_num, control)
+left join workzone.spatial_pseudo_weather_matched
+		using (series, sequence_num, control)
+left join workzone.spatial_pseudo_speed_matched
+		using (series, sequence_num, control)
+left join workzone.spatial_pseudo_wz_crash
+		using(series, sequence_num, control)
+left join workzone.spatial_pseudo_numberofinters
+		using(series)
+order by
+	workzone.spatial_pseudo_wz_divided_controlled.series,
+	workzone.spatial_pseudo_wz_divided_controlled."control",
+	workzone.spatial_pseudo_wz_divided_controlled.sequence_num;

@@ -1,0 +1,28 @@
+drop table if exists workzone.spatial_pseudo_aadt_speed_limit;
+create table workzone.spatial_pseudo_aadt_speed_limit as
+select
+	workzone.spatial_pseudo_wz_divided_controlled.*,
+	workzone.{spatial_pseudo}.pennshids,
+	workzone.pid_speed_limit.speed_limit,
+	case
+		when extract(year
+	from
+		workzone.spatial_pseudo_wz_divided_controlled.wztime_divided_stamp_controlled)= 2014 then workzone.pid_AADT.aadt_2014
+		when extract(year
+	from
+		workzone.spatial_pseudo_wz_divided_controlled.wztime_divided_stamp_controlled)= 2015 then workzone.pid_AADT.aadt_2015
+		when extract(year
+	from
+		workzone.spatial_pseudo_wz_divided_controlled.wztime_divided_stamp_controlled)= 2016 then workzone.pid_AADT.aadt_2016
+		when extract(year
+	from
+		workzone.spatial_pseudo_wz_divided_controlled.wztime_divided_stamp_controlled)= 2017 then workzone.pid_AADT.aadt_2017
+	end AADT_new
+from
+	workzone.spatial_pseudo_wz_divided_controlled
+left join workzone.{spatial_pseudo} on
+	workzone.spatial_pseudo_wz_divided_controlled.series = workzone.{spatial_pseudo}.series
+left join workzone.pid_speed_limit on
+	workzone.{spatial_pseudo}.pennshids = workzone.pid_speed_limit.pennshids
+left join workzone.pid_aadt on
+	workzone.{spatial_pseudo}.pennshids = workzone.pid_aadt.pennshids;

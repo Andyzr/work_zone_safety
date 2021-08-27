@@ -1,0 +1,55 @@
+create index if not exists idx_wzsens_speedlimit on workzone.wzsens_wzinfo_speedlimit("wzID");
+create index if not exists idx_wzsens_weather on workzone.wzsens_weather_matched(wzid,control,sequence_num);
+create index if not exists idx_wzsens_speedmatched on workzone.wzsens_speed_matched(wzid,control,sequence_num);
+create index if not exists idx_wzsens_crash1 on workzone.wzsens_wz_crash_1(wzid,control,sequence_num);
+create index if not exists idx_wzsens_crash2 on workzone.wzsens_wz_crash_2(wzid,control,sequence_num);
+drop table if exists workzone.{pseudo_output_table};
+create table workzone.{pseudo_output_table} as
+select
+	workzone.wzsens_wz_divided_controlled.wzid as wzid_new,
+	workzone.wzsens_wz_divided_controlled.control,
+	workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled as wztime_divided_stamp,
+	workzone.wzsens_wzinfo_speedlimit."location" ,
+	workzone.wzsens_wzinfo_speedlimit.closure,
+	workzone.wzsens_wzinfo_speedlimit."LaneCounts",
+	workzone.wzsens_wzinfo_speedlimit."NHS_IND",
+	workzone.wzsens_wzinfo_speedlimit."PA_BYWAY_I",
+	workzone.wzsens_wzinfo_speedlimit.duration,
+	workzone.wzsens_wzinfo_speedlimit."NUM_inters",
+	workzone.wzsens_wzinfo_speedlimit.speed_limit,
+	workzone.wzsens_wzinfo_speedlimit."AADT_new",
+	cast(date_part('dow', workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled) between 1 and 5 as int) as weekdayofweek,
+	date_part('month', workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled) as month,
+	cast(date_part('hour', workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled) between 6 and 17 as int) as daytimeofday,
+	workzone.wzsens_wzinfo_speedlimit."NetLength",
+	date_part('year', workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled) as year,
+	workzone.wzsens_weather_matched."AveT" as avet,
+	workzone.wzsens_weather_matched."AveP" as avep,
+	workzone.wzsens_weather_matched."AveW" as avew,
+	workzone.wzsens_speed_matched.real_speed_61 as real_speed_61,
+	workzone.wzsens_speed_matched.historical_speed_61 as historical_speed_61,
+	workzone.wzsens_speed_matched.free_speed_61 as free_speed_61,
+	CASE
+    WHEN workzone.wzsens_wz_divided_controlled."control"<=0 THEN workzone.wzsens_wz_crash_1.crash_occurrence
+    ELSE workzone.wzsens_wz_crash_2.crash_occurrence
+	END AS crash_61,
+	CASE
+    WHEN workzone.wzsens_wz_divided_controlled."control"<=0 THEN workzone.wzsens_wz_crash_1.crash_severity
+    ELSE workzone.wzsens_wz_crash_2.crash_severity
+	END AS crash_severe_61
+from
+	workzone.wzsens_wz_divided_controlled
+left join workzone.wzsens_wzinfo_speedlimit
+		on wzsens_wz_divided_controlled.wzid = wzsens_wzinfo_speedlimit."wzID" 
+left join workzone.wzsens_weather_matched
+		using (wzid, control,sequence_num)
+left join workzone.wzsens_speed_matched
+		using (wzid, control,sequence_num)
+left join workzone.wzsens_wz_crash_1
+		using (wzid, control,sequence_num)
+left join workzone.wzsens_wz_crash_2
+		using (wzid, control,sequence_num)
+order by
+	workzone.wzsens_wz_divided_controlled.wzid,
+	workzone.wzsens_wz_divided_controlled."control",
+	workzone.wzsens_wz_divided_controlled.sequence_num  ;

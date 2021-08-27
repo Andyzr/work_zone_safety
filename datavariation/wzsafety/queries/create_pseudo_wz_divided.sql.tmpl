@@ -1,0 +1,45 @@
+--create wzinfos
+drop table if exists workzone.spatial_pseudo_wz_info;
+create table workzone.spatial_pseudo_wz_info as
+select
+	workzone.{spatial_pseudo}.*,
+	series as wzid,
+	' in' as location,
+	0.5 + 0.5 *cast(random()>{closure_prop} as int) as closure,
+	lane_cnt as lanecounts,
+	cur_aadt as aadt,
+	{duration_min} + random()*({duration_max}-{duration_min}) as duration,
+	seg_lngth_*0.3048 as netlength
+from
+	workzone.{spatial_pseudo};
+-- expand wzinfo table as 30min observations
+drop table if exists workzone.spatial_pseudo_wz_divided;
+ create table workzone.spatial_pseudo_wz_divided as
+select
+	workzone.spatial_pseudo_wz_info.series,
+	generate_series(0, cast (duration / {wz_divided_interval} as int), 1) as sequence_num,
+	time_round + interval '30 min' * generate_series(0, cast(duration / {wz_divided_interval} as int), 1) as wztime_divided_stamp
+from
+	workzone.spatial_pseudo_wz_info
+where
+	series in (
+	select
+		distinct series
+	from
+		workzone.{spatial_pseudo});
+--expand wzdivided table to include 6 weeks before and 6 weeks after
+drop table if exists workzone.spatial_pseudo_wz_divided_controlled;
+ create table workzone.spatial_pseudo_wz_divided_controlled as
+select
+	workzone.spatial_pseudo_wz_divided.series,
+	workzone.spatial_pseudo_wz_divided.sequence_num,
+	generate_series(-6, 6, 1) as "control",
+	wztime_divided_stamp + interval '1 week' * generate_series(-6, 6, 1) as wztime_divided_stamp_controlled
+from
+	workzone.spatial_pseudo_wz_divided
+where
+	row(series, sequence_num) in (
+	select
+		series, sequence_num
+	from
+		workzone.spatial_pseudo_wz_divided);

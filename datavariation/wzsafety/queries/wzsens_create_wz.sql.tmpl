@@ -1,0 +1,129 @@
+ drop table if exists workzone.wzsens_need_exclude;
+
+create table workzone.wzsens_need_exclude as
+select
+	pseudo.wzid,
+	wzidtime.wzid as matched_wzid
+from
+	(
+	select
+		workzone.wz_id_pennshid_in.*, to_timestamp(public.workzone_2015_17."DATE_TIME_CLOSED_QRY"::text, 'yyyymmddhh24mi') at time zone 'America/New_York' as closed, to_timestamp(public.workzone_2015_17."ACT_DATE_TIME_OPENED_QRY"::text, 'yyyymmddhh24mi') at time zone 'America/New_York' as opened
+	from
+		workzone.wz_id_pennshid_in
+	inner join public.workzone_2015_17 on
+		workzone.wz_id_pennshid_in.wzid = public.workzone_2015_17."cleanID"-1) pseudo
+inner join (
+	select
+		workzone.wz_id_pennshid_in.*, to_timestamp(public.workzone_2015_17."DATE_TIME_CLOSED_QRY"::text, 'yyyymmddhh24mi') at time zone 'America/New_York' as closed, to_timestamp(public.workzone_2015_17."ACT_DATE_TIME_OPENED_QRY"::text, 'yyyymmddhh24mi') at time zone 'America/New_York' as opened
+	from
+		workzone.wz_id_pennshid_in
+	inner join public.workzone_2015_17 on
+		workzone.wz_id_pennshid_in.wzid = public.workzone_2015_17."cleanID"-1 )wzidtime on
+	(pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '1 week'
+	and pseudo.closed < wzidtime.opened - interval '1 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '1 week'
+	and pseudo.opened < wzidtime.opened - interval '1 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '1 week'
+	and pseudo.opened > wzidtime.opened - interval '1 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '2 week'
+	and pseudo.closed < wzidtime.opened - interval '2 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '2 week'
+	and pseudo.opened < wzidtime.opened - interval '2 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '2 week'
+	and pseudo.opened > wzidtime.opened - interval '2 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '3 week'
+	and pseudo.closed < wzidtime.opened - interval '3 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '3 week'
+	and pseudo.opened < wzidtime.opened - interval '3 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '3 week'
+	and pseudo.opened > wzidtime.opened - interval '3 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '4 week'
+	and pseudo.closed < wzidtime.opened - interval '4 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '4 week'
+	and pseudo.opened < wzidtime.opened - interval '4 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '4 week'
+	and pseudo.opened > wzidtime.opened - interval '4 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '5 week'
+	and pseudo.closed < wzidtime.opened - interval '5 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '5 week'
+	and pseudo.opened < wzidtime.opened - interval '5 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '5 week'
+	and pseudo.opened > wzidtime.opened - interval '5 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '6 week'
+	and pseudo.closed < wzidtime.opened - interval '6 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '6 week'
+	and pseudo.opened < wzidtime.opened - interval '6 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '6 week'
+	and pseudo.opened > wzidtime.opened - interval '6 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '7 week'
+	and pseudo.closed < wzidtime.opened - interval '7 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '7 week'
+	and pseudo.opened < wzidtime.opened - interval '7 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '7 week'
+	and pseudo.opened > wzidtime.opened - interval '7 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '8 week'
+	and pseudo.closed < wzidtime.opened - interval '8 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '8 week'
+	and pseudo.opened < wzidtime.opened - interval '8 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '8 week'
+	and pseudo.opened > wzidtime.opened - interval '8 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '9 week'
+	and pseudo.closed < wzidtime.opened - interval '9 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '9 week'
+	and pseudo.opened < wzidtime.opened - interval '9 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '9 week'
+	and pseudo.opened > wzidtime.opened - interval '9 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed > wzidtime.closed - interval '10 week'
+	and pseudo.closed < wzidtime.opened - interval '10 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.opened > wzidtime.closed - interval '10 week'
+	and pseudo.opened < wzidtime.opened - interval '10 week')
+	or (pseudo.pennshid = wzidtime.pennshid
+	and pseudo.closed < wzidtime.closed - interval '10 week'
+	and pseudo.opened > wzidtime.opened - interval '10 week');
+---exclude the random observations which are in the work zone records
+ drop table if exists workzone.wzsens;
+
+create table workzone.wzsens as
+select
+	workzone.wz_id_pennshid_in.*,
+	to_timestamp(public.workzone_2015_17."DATE_TIME_CLOSED_QRY"::text, 'yyyymmddhh24mi') at time zone 'America/New_York' as closed,
+	to_timestamp(public.workzone_2015_17."ACT_DATE_TIME_OPENED_QRY"::text, 'yyyymmddhh24mi') at time zone 'America/New_York' as opened
+from
+	workzone.wz_id_pennshid_in
+inner join public.workzone_2015_17 on
+	workzone.wz_id_pennshid_in.wzid = public.workzone_2015_17."cleanID"-1
+where
+	workzone.wz_id_pennshid_in.wzid not in (
+	select
+		wzid
+	from
+		workzone.wzsens_need_exclude);

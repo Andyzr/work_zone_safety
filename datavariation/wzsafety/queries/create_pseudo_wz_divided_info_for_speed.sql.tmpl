@@ -1,0 +1,9 @@
+select
+	workzone.spatial_pseudo_wz_divided_controlled.*,workzone.{spatial_pseudo}.pennshids,workzone.pid_mid."MultiID"
+from
+	workzone.spatial_pseudo_wz_divided_controlled
+left join workzone.{spatial_pseudo} on
+	workzone.spatial_pseudo_wz_divided_controlled.series = workzone.{spatial_pseudo}.series
+left join workzone.pid_mid on 
+	workzone.{spatial_pseudo}.pennshids = workzone.pid_mid."PennShIDs"
+where "MultiID" is not null;

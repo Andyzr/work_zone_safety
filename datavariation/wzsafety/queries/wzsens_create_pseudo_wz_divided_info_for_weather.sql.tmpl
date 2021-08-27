@@ -1,0 +1,11 @@
+select
+	workzone.wzsens_wz_divided_controlled.wzid,
+	workzone.wzsens_wz_divided_controlled.control,
+	workzone.wzsens_wz_divided_controlled.sequence_num,
+	workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled,
+	workzone.wzsens.pennshid
+from
+	workzone.wzsens_wz_divided_controlled
+left join workzone.wzsens on
+	workzone.wzsens_wz_divided_controlled.wzid = workzone.wzsens.wzid
+order by workzone.wzsens_wz_divided_controlled.wzid , workzone.wzsens_wz_divided_controlled.control , workzone.wzsens_wz_divided_controlled.sequence_num;

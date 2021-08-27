@@ -1,0 +1,17 @@
+create table {spatial_speed_table_output_name} as
+select {spatial_speed_table_name}.*,
+AVG(speed_db.speed.speed) AS real_speed_61,
+AVG(speed_db.speed.average_speed) AS historical_speed_61,
+AVG(speed_db.speed.reference_speed) AS free_speed_61
+from {spatial_speed_table_name}
+left join speed_db.speed
+on  {spatial_speed_table_name}.MultiID = speed_db.speed.tmc_code 
+and speed_db.speed.measurement_tstamp 
+BETWEEN 
+datetime({spatial_speed_table_name}.wztime_divided_stamp_controlled, '-3.5 hours') 
+AND
+datetime({spatial_speed_table_name}.wztime_divided_stamp_controlled , '-0.5 hours')
+GROUP BY {spatial_speed_table_name}.series,
+        {spatial_speed_table_name}.sequence_num,
+        {spatial_speed_table_name}.control,
+        {spatial_speed_table_name}.wztime_divided_stamp_controlled;

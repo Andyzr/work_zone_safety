@@ -1,0 +1,41 @@
+
+drop table if exists workzone.wzspatial_wz_info;
+create table workzone.wzspatial_wz_info as
+select 
+	wzid_time_series.series,wzid_time_series.closed,wzid_time_series.opened,
+	extract(epoch FROM wzid_time_series.opened-wzid_time_series.closed) as duration
+from
+	(select row_number() over() as series, wzid_time.* from 
+(
+select distinct workzone.used_wzids.wzid_new, workzone.wzsens.closed,workzone.wzsens.opened
+from workzone.used_wzids 
+left join workzone.wzsens 
+on workzone.used_wzids.wzid_new = workzone.wzsens.wzid 
+where closed is not null and opened is not null) wzid_time)wzid_time_series;
+
+-- expand wzinfo table as 30min observations
+drop table if exists workzone.wzspatial_wz_divided;
+ create table workzone.wzspatial_wz_divided as
+select
+	workzone.wzspatial_wz_info.series,
+	generate_series(0, cast (duration / {wz_divided_interval}  as int), 1) as sequence_num,
+	closed + interval '30 min' * generate_series(0, cast(duration / {wz_divided_interval}  as int), 1) as wztime_divided_stamp
+from
+	workzone.wzspatial_wz_info;
+
+--where
+--	wzid in (
+--	select
+--		distinct wzid
+--	from
+--		workzone.wzsens);
+--expand wzdivided table to include 6 weeks before and 6 weeks after
+drop table if exists workzone.wzspatial_wz_divided_controlled;
+ create table workzone.wzspatial_wz_divided_controlled as
+select
+	workzone.wzspatial_wz_divided.series,
+	workzone.wzspatial_wz_divided.sequence_num,
+	generate_series(-10, 10, 1) as "control",
+	wztime_divided_stamp + interval '1 week' * generate_series(-10, 10, 1) as wztime_divided_stamp_controlled
+from
+	workzone.wzspatial_wz_divided;

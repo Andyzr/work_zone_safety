@@ -1,0 +1,56 @@
+create index if not exists idx_wzsens_speedlimit on workzone.wzsens_wzinfo_speedlimit("wzID");
+create index if not exists idx_wzspatial_weather on workzone.wzspatial_weather_matched(series,control,sequence_num);
+create index if not exists idx_wzspatial_speedmatched on workzone.wzspatial_speed_matched(series,control,sequence_num);
+create index if not exists idx_wzspatial_crash on workzone.wzspatial_pseudo_wz_crash(series,control,sequence_num);
+create index if not exists idx_wzspatial_divided_controlled on workzone.wzspatial_wz_divided_controlled(series,control,sequence_num);
+-- create index if not exists idx_wzspatial_crash2 on workzone.wzspatial_wz_crash_2(wzid,control,sequence_num);
+drop table if exists workzone.{pseudo_output_table};
+create table workzone.{pseudo_output_table} as
+select
+	workzone.wzspatial_wz_divided_controlled.series as wzid_new,
+	workzone.wzspatial_wz_divided_controlled.control,
+	workzone.wzspatial_wz_divided_controlled.wztime_divided_stamp_controlled as wztime_divided_stamp,
+	workzone.wzsens_wzinfo_speedlimit."location" ,
+	workzone.wzsens_wzinfo_speedlimit.closure,
+	workzone.wzsens_wzinfo_speedlimit."LaneCounts",
+	workzone.wzsens_wzinfo_speedlimit."NHS_IND",
+	workzone.wzsens_wzinfo_speedlimit."PA_BYWAY_I",
+	workzone.wzsens_wzinfo_speedlimit.duration,
+	workzone.wzsens_wzinfo_speedlimit."NUM_inters",
+	workzone.wzsens_wzinfo_speedlimit.speed_limit,
+	workzone.wzsens_wzinfo_speedlimit."AADT_new",
+	cast(date_part('dow', workzone.wzspatial_wz_divided_controlled.wztime_divided_stamp_controlled) between 1 and 5 as int) as weekdayofweek,
+	date_part('month', workzone.wzspatial_wz_divided_controlled.wztime_divided_stamp_controlled) as month,
+	cast(date_part('hour', workzone.wzspatial_wz_divided_controlled.wztime_divided_stamp_controlled) between 6 and 17 as int) as daytimeofday,
+	workzone.wzsens_wzinfo_speedlimit."NetLength",
+	date_part('year', workzone.wzspatial_wz_divided_controlled.wztime_divided_stamp_controlled) as year,
+	workzone.wzspatial_weather_matched."AveT" as avet,
+	workzone.wzspatial_weather_matched."AveP" as avep,
+	workzone.wzspatial_weather_matched."AveW" as avew,
+	workzone.wzspatial_speed_matched.real_speed_61 as real_speed_61,
+	workzone.wzspatial_speed_matched.historical_speed_61 as historical_speed_61,
+	workzone.wzspatial_speed_matched.free_speed_61 as free_speed_61,
+	workzone.wzspatial_pseudo_wz_crash.crash_occurrence AS crash_61,
+	workzone.wzspatial_pseudo_wz_crash.crash_severity AS crash_severe_61
+from
+	workzone.wzspatial_wz_divided_controlled
+left join workzone.wzspatial_pseudo_wzid_pids
+		on workzone.wzspatial_wz_divided_controlled.series = workzone.wzspatial_pseudo_wzid_pids.series
+left join workzone.wzsens_wzinfo_speedlimit
+		on workzone.wzspatial_pseudo_wzid_pids.wzid_ref = wzsens_wzinfo_speedlimit."wzID" 
+left join workzone.wzspatial_weather_matched
+		on wzspatial_wz_divided_controlled.series = workzone.wzspatial_weather_matched.series
+		and wzspatial_wz_divided_controlled.control = workzone.wzspatial_weather_matched.control
+		and wzspatial_wz_divided_controlled.sequence_num = workzone.wzspatial_weather_matched.sequence_num
+left join workzone.wzspatial_speed_matched
+		on wzspatial_wz_divided_controlled.series = workzone.wzspatial_speed_matched.series
+		and wzspatial_wz_divided_controlled.control = workzone.wzspatial_speed_matched.control
+		and wzspatial_wz_divided_controlled.sequence_num = workzone.wzspatial_speed_matched.sequence_num
+left join workzone.wzspatial_pseudo_wz_crash
+		on wzspatial_wz_divided_controlled.series = workzone.wzspatial_pseudo_wz_crash.series
+		and wzspatial_wz_divided_controlled.control = workzone.wzspatial_pseudo_wz_crash.control
+		and wzspatial_wz_divided_controlled.sequence_num = workzone.wzspatial_pseudo_wz_crash.sequence_num
+order by
+	workzone.wzspatial_wz_divided_controlled.series,
+	workzone.wzspatial_wz_divided_controlled."control",
+	workzone.wzspatial_wz_divided_controlled.sequence_num  ;

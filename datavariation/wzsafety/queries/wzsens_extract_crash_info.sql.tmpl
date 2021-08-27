@@ -1,0 +1,64 @@
+create index if not exists idx_wzxy on workzone.workzone15_loc_61_in(x_int10,y_int10);
+--drop index if exists idx_wzid;
+create index if not exists idx_wzid on workzone.workzone15_loc_61_in(wzid);
+
+create table if not exists workzone.crash_xy_10 as
+select workzone.crash.*,
+cast(workzone.crash.keplist_0x *10 as int) as x_int10,
+cast(workzone.crash.keplist_0y *10 as int) as y_int10
+from workzone.crash;
+
+--drop index if exists idx_crash_xy_10;
+create index if not exists idx_crash_xy_10 on workzone.crash_xy_10(x_int10,y_int10);
+create index if not exists idx_crash_xy_10_time on workzone.crash_xy_10(time_stamp);
+
+drop table if exists workzone.wzsens_wz_crash_1;
+create table workzone.wzsens_wz_crash_1 as 
+select
+	wzsens_wz_divided_controlled.wzid,
+	workzone.wzsens_wz_divided_controlled."control",
+	workzone.wzsens_wz_divided_controlled.sequence_num,
+	cast(sum(workzone.crash_xy_10.fatal_or_maj_inj) is not null as int) as crash_occurrence,
+	cast(sum(workzone.crash_xy_10.fatal_or_maj_inj) is not null and sum(workzone.crash_xy_10.fatal_or_maj_inj) > 0 as int) as crash_severity
+from
+	workzone.wzsens_wz_divided_controlled
+--left join workzone.wz_id_pennshid_in on
+--	workzone.wzsens_wz_divided_controlled.wzid = workzone.wz_id_pennshid_in.wzid
+left join workzone.workzone15_loc_61_in on
+	workzone.wzsens_wz_divided_controlled.wzid = workzone.workzone15_loc_61_in.wzid
+left join workzone.crash_xy_10 on
+	TO_TIMESTAMP(workzone.crash_xy_10.time_stamp)  at time zone 'utc' at time zone 'America/New_York'  between workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled
+	and workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled + interval '30min'
+--	and workzone.wz_id_pennshid_in.pennshid  = workzone.crash.pennshids_grav 
+	and workzone.workzone15_loc_61_in.x_int10 = workzone.crash_xy_10.x_int10 
+	and workzone.workzone15_loc_61_in.y_int10 = workzone.crash_xy_10.y_int10
+where workzone.wzsens_wz_divided_controlled."control"<=0
+group by wzsens_wz_divided_controlled.wzid,workzone.wzsens_wz_divided_controlled."control",workzone.wzsens_wz_divided_controlled.sequence_num ;
+
+drop table if exists workzone.wzsens_wz_crash_2;
+create table workzone.wzsens_wz_crash_2 as 
+select
+	wzsens_wz_divided_controlled.wzid,
+	workzone.wzsens_wz_divided_controlled."control",
+	workzone.wzsens_wz_divided_controlled.sequence_num,
+	cast(sum(workzone.crash_xy_10.fatal_or_maj_inj) is not null as int) as crash_occurrence,
+	cast(sum(workzone.crash_xy_10.fatal_or_maj_inj) is not null and sum(workzone.crash_xy_10.fatal_or_maj_inj) > 0 as int) as crash_severity
+from
+	workzone.wzsens_wz_divided_controlled
+--left join workzone.wz_id_pennshid_in on
+--	workzone.wzsens_wz_divided_controlled.wzid = workzone.wz_id_pennshid_in.wzid
+left join workzone.workzone15_loc_61_in on
+	workzone.wzsens_wz_divided_controlled.wzid = workzone.workzone15_loc_61_in.wzid
+left join workzone.crash_xy_10 on
+	TO_TIMESTAMP(workzone.crash_xy_10.time_stamp)  at time zone 'utc' at time zone 'America/New_York'  between workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled
+	and workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled + interval '30min'
+--	and workzone.wz_id_pennshid_in.pennshid  = workzone.crash.pennshids_grav 
+	and workzone.workzone15_loc_61_in.x_int10 = workzone.crash_xy_10.x_int10 
+	and workzone.workzone15_loc_61_in.y_int10 = workzone.crash_xy_10.y_int10
+where workzone.wzsens_wz_divided_controlled."control">0
+group by wzsens_wz_divided_controlled.wzid,workzone.wzsens_wz_divided_controlled."control",workzone.wzsens_wz_divided_controlled.sequence_num ;
+
+
+
+
+

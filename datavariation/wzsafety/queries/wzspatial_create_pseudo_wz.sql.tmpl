@@ -1,0 +1,26 @@
+-- 1. randomly select wzids for 1 time of original time sets
+drop table if exists workzone.wzspatial_pseudo_wzid;
+create table workzone.wzspatial_pseudo_wzid as
+select * from workzone.used_wzids order by random() limit  (select count(*) from 
+(
+select distinct workzone.used_wzids.wzid_new, workzone.wzsens.closed,workzone.wzsens.opened
+from workzone.used_wzids 
+left join workzone.wzsens 
+on workzone.used_wzids.wzid_new = workzone.wzsens.wzid 
+where closed is not null and opened is not null) wzid_time) ;
+
+drop table if exists workzone.wzspatial_pseudo_wzid_series;
+create table workzone.wzspatial_pseudo_wzid_series as
+select wzid_new ,row_number() over () as series from workzone.wzspatial_pseudo_wzid ;
+
+--select * from workzone.wzspatial_pseudo_wzid_series limit 10;
+
+--select count(distinct wzid_new ) from workzone.wzspatial_pseudo_wzid limit 10;
+--2. get new pennshids for each spatial placebo obserevation
+drop table if exists workzone.wzspatial_pseudo_wzid_pids;
+create table workzone.wzspatial_pseudo_wzid_pids as
+select workzone.wzspatial_pseudo_wzid_series.series,workzone.wz_id_pennshid_in.pennshid, workzone.wzspatial_pseudo_wzid_series.wzid_new as wzid_ref
+from workzone.wzspatial_pseudo_wzid_series 
+left join workzone.wz_id_pennshid_in 
+on workzone.wzspatial_pseudo_wzid_series.wzid_new = workzone.wz_id_pennshid_in.wzid order by series 
+;

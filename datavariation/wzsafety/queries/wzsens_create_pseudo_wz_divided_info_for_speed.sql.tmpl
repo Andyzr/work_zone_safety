@@ -1,0 +1,15 @@
+select
+	workzone.wzsens_wz_divided_controlled.wzid,
+	workzone.wzsens_wz_divided_controlled.control,
+	workzone.wzsens_wz_divided_controlled.sequence_num,
+	workzone.wzsens_wz_divided_controlled.wztime_divided_stamp_controlled,
+	workzone.wzsens.pennshid,
+	workzone.pid_mid."MultiID"
+from
+	workzone.wzsens_wz_divided_controlled
+left join workzone.wzsens on
+	workzone.wzsens_wz_divided_controlled.wzid = workzone.wzsens.wzid
+left join workzone.pid_mid on 
+	workzone.wzsens.pennshid = workzone.pid_mid."PennShIDs"
+where "MultiID" is not null
+order by workzone.wzsens_wz_divided_controlled.wzid , workzone.wzsens_wz_divided_controlled.control , workzone.wzsens_wz_divided_controlled.sequence_num;

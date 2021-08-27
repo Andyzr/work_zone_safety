@@ -1,0 +1,29 @@
+db_host: "127.0.0.1"
+db_database: "gisdb"
+db_port: fakeport
+db_user: "postgres"
+
+#pseudo wz
+numberofpseudowzs: 10000
+
+#pseudo wz divided
+closure_prop: 0.0916 #SELECT closure,count(*)  FROM public.workzone_2015_17  group by closure;
+duration_max: 43200 #SELECT min(duration),max(duration) FROM public.workzone_2015_17 where duration >0 limit 10;
+duration_min: 1800
+wz_divided_interval: 1800 # note the unit should be consistent with duration
+spatial_pseudo_table_name: 'wzspatial_pseudo_wzid_pids'
+
+#pseudo wz speed
+output_speed_db_loc: '/media/andy/b4a51c70-19cd-420f-91e4-c7adf2274c39/WorkZone/INRIX_2012_17/wzspatial_v2.db'
+speed_db_loc: '/media/andy/b4a51c70-19cd-420f-91e4-c7adf2274c39/WorkZone/INRIX_2012_17/speed_2012_17.db'
+spatial_speed_table_name: 'wzspatial_controlled'
+spatial_speed_table_output_name: 'wzspatial_speed_matched'
+
+#pseudo wz weather
+spatial_weather_table_name: "wzspatial_controlled_weather"
+spatial_weather_table_output_name: 'wzspatial_weather_matched'
+
+#number of inters
+spatial_pseudo_wz_info_table_name: wzspatial_pseudo_pid
+#pseudo wz joining
+pseudo_output_table: 'wzspatial_output_full_table_v2'

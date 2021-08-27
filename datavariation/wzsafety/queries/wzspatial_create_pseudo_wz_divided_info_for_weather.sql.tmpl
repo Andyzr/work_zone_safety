@@ -1,0 +1,12 @@
+select
+	workzone.wzspatial_wz_divided_controlled.series,
+	workzone.wzspatial_wz_divided_controlled."control",
+	workzone.wzspatial_wz_divided_controlled.sequence_num,
+	workzone.wzspatial_wz_divided_controlled.wztime_divided_stamp_controlled,
+	workzone.wzspatial_pseudo_wzid_pids.pennshid
+from
+	workzone.wzspatial_wz_divided_controlled
+left join workzone.wzspatial_pseudo_wzid_pids on
+	workzone.wzspatial_wz_divided_controlled.series = workzone.wzspatial_pseudo_wzid_pids.series
+order by workzone.wzspatial_wz_divided_controlled.series,
+workzone.wzspatial_wz_divided_controlled."control", workzone.wzspatial_wz_divided_controlled.sequence_num;
