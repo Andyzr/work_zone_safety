@@ -1,12 +1,13 @@
 # Work zone safety study
 
-The code in this project is finished in three step:
+The code in this project is finished in the following steps:
 
 1. Use Python to perform map-matching on work zones and crashes. Save the output as separate files.
 2. Export separate files into Sqlite3 and PostgreSQL databases. Then use SQL and use Python to do data fusion.
 3. Using R, import the processed data and do the major model analysis.
 4. Some robustness tests require new data sets (spatial robustness tests and bandwidth sensitivity tests), so some wrapped code are created in `datavariation/wzsafety` to quickly produce required new data set with configure files `wzspatial.yaml` and `wzsens.yaml`.
 5. Most model analysis are finished in R, while `./models/rebust_firth_20200823.do` is executed in Stata.
+
 ## Data processing
 
 These codes are stored at `./datapreprocessing`.
