@@ -1,5 +1,23 @@
 # Work zone safety study
 
+This is the code repository for the paper *Inferring the causal effect of work zones on crashes: Methodology and a case study*. It is open-sourced at
+[https://doi.org/10.1016/j.amar.2021.100203](https://doi.org/10.1016/j.amar.2021.100203). You can cite this paper by:
+
+```BibTeX
+@article{ZHANG2022100203,
+title = {Inferring the causal effect of work zones on crashes: Methodology and a case study},
+journal = {Analytic Methods in Accident Research},
+volume = {33},
+pages = {100203},
+year = {2022},
+issn = {2213-6657},
+doi = {https://doi.org/10.1016/j.amar.2021.100203},
+url = {https://www.sciencedirect.com/science/article/pii/S2213665721000476},
+author = {Zhuoran Zhang and Burcu Akinci and Sean Qian},
+keywords = {work zone safety, causal inference, crash analysis, multisource data, rare event bias}
+}
+```
+
 The workflow of this project:
 
 1. Use Python to perform map-matching on work zones and crashes. Save the output as separate files.
